@@ -55,4 +55,4 @@
     $.on('click', '.btn#left', click_event),
     $.on('click', '.btn#right', click_event)
   );
-})(window.D)
+})(window.D);
