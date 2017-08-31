@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Image, Text, Button, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, View, Image, Text, Button, TouchableOpacity, ScrollView, WebView } from 'react-native';
 
 const _ = require('partial-js'), TO = TouchableOpacity;
 const images = {
@@ -23,21 +23,16 @@ const images = {
   G: require('./img/img_18.png'),
   H: require('./img/img_19.png'),
 };
-
-var t = { city: 0, rest: 0, purpose: 0, achieve: 0, consume: 0 };
+let t = { city: 0, rest: 0, purpose: 0, achieve: 0, consume: 0 };
 
 function a_or_b(a, b) {
-  return function(id) {
-    if (id == 'left') ++t[a];
-    else ++t[b];
-  }
+  return (id) => ++t[id == 'left' ? a : b];
 }
-
 function type_is(t) {
-  if (_.every(t, function(t) { return t == 2 })) return 'D'; /*"당신은 숨만 쉬어도 행복한 말미잘"*/
-  else if (t.city == 4 && t.consume < 3 && t.achieve < 3 && t.rest < 3 && t.purpose < 3) return 'B'; /*"당신은 차가운 도시 여우"*/
+  if (_.every(t, t => t === 2)) return 'D'; /*"당신은 숨만 쉬어도 행복한 말미잘"*/
+  else if (t.city === 4 && t.consume < 3 && t.achieve < 3 && t.rest < 3 && t.purpose < 3) return 'B'; /*"당신은 차가운 도시 여우"*/
   else if (t.achieve + t.rest >=5 && t.consume <= 2) return 'A'; /*"당신은 티타임매니아 다람쥐"*/
-  else if (t.consume == 4 && t.consume + t.purpose >= 5) return 'F'; /*"당신은 클러버 올빼미"*/
+  else if (t.consume === 4 && t.consume + t.purpose >= 5) return 'F'; /*"당신은 클러버 올빼미"*/
   else if (t.rest + t.consume >= 5 && t.achieve <= 2) return 'H'; /*"당신은 반전매력 돌고래"*/
   else if (t.consume + t.city >= 5) return 'C'; /*"당신은 주머니 열린 캥거루"*/
   else if (t.purpose + t.city >= 5) return 'G'; /*"당신은 재벌 2세 공작새"*/
@@ -102,7 +97,7 @@ export default class App extends React.Component {
       11: a_or_b('rest', 'city'),
       12: () => {
         this.setState(ps => ({
-          uri: images[1],
+          // uri: images[1],
           page: 1,
           scroll: false,
           btn: {
@@ -128,6 +123,7 @@ export default class App extends React.Component {
   click_event(id) {
     if (this.state.page === 11) {
       this.setState(ps => ({
+        uri: images[type_is(t)],
         page: ps.page+1,
         scroll: true,
         left_btn: {
@@ -140,15 +136,17 @@ export default class App extends React.Component {
           right: 27,
           width: 322,
           height: 60
-        },
-        uri: images[type_is(t)]
+        }
       }));
-      return _.isFunction(this.actions[this.state.page]) && this.actions[this.state.page](id);
+      return this.actions[11](id);
     }
 
-    _.isFunction(this.actions[this.state.page]) && this.actions[this.state.page](id);
-    if (this.state.page > 11) return;
+    if (this.state.page === 12) {
+      this.setState(ps => ({ uri: images[1] }));
+      return this.actions[12]();
+    }
 
+    this.actions[this.state.page](id);
     return this.setState(ps => ({
       page: ps.page+1,
       uri: images[ps.page+1]
