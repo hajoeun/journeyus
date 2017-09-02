@@ -23,21 +23,6 @@ const images = {
   G: require('./img/img_18.png'),
   H: require('./img/img_19.png'),
 };
-let t = { city: 0, rest: 0, purpose: 0, achieve: 0, consume: 0 };
-
-function a_or_b(a, b) {
-  return (id) => ++t[id == 'left' ? a : b];
-}
-function type_is(t) {
-  if (_.every(t, t => t === 2)) return 'D'; /*"당신은 숨만 쉬어도 행복한 말미잘"*/
-  else if (t.city === 4 && t.consume < 3 && t.achieve < 3 && t.rest < 3 && t.purpose < 3) return 'B'; /*"당신은 차가운 도시 여우"*/
-  else if (t.achieve + t.rest >=5 && t.consume <= 2) return 'A'; /*"당신은 티타임매니아 다람쥐"*/
-  else if (t.consume === 4 && t.consume + t.purpose >= 5) return 'F'; /*"당신은 클러버 올빼미"*/
-  else if (t.rest + t.consume >= 5 && t.achieve <= 2) return 'H'; /*"당신은 반전매력 돌고래"*/
-  else if (t.consume + t.city >= 5) return 'C'; /*"당신은 주머니 열린 캥거루"*/
-  else if (t.purpose + t.city >= 5) return 'G'; /*"당신은 재벌 2세 공작새"*/
-  else if (t.achieve + t.rest >=5 ) return 'E'; /*"당신은 뜨거운 심장의 기린"*/
-}
 
 export default class App extends React.Component {
   constructor(props) {
@@ -63,8 +48,35 @@ export default class App extends React.Component {
         height: 60
       },
       bg_img: {
-        resizeMode: 'contain'
+        width: 375,
+        height: 667,
       }
+    };
+
+    this.img_height = {
+      A: 901,
+      B: 901,
+      C: 905,
+      D: 770,
+      E: 851,
+      F: 771,
+      G: 830,
+      H: 941
+    };
+
+    this.t = { city: 0, rest: 0, purpose: 0, achieve: 0, consume: 0 };
+
+    this.a_or_b = (a, b) => (id => ++this.t[id === 'left' ? a : b]);
+
+    this.type_is = t => {
+      if (_.every(t, t => t === 2)) return 'D'; /*"당신은 숨만 쉬어도 행복한 말미잘"*/
+      else if (t.city === 4 && t.consume < 3 && t.achieve < 3 && t.rest < 3 && t.purpose < 3) return 'B'; /*"당신은 차가운 도시 여우"*/
+      else if (t.achieve + t.rest >=5 && t.consume <= 2) return 'A'; /*"당신은 티타임매니아 다람쥐"*/
+      else if (t.consume === 4 && t.consume + t.purpose >= 5) return 'F'; /*"당신은 클러버 올빼미"*/
+      else if (t.achieve <= 2 && t.rest + t.consume >= 5) return 'H'; /*"당신은 반전매력 돌고래"*/
+      else if (t.consume + t.city >= 5) return 'C'; /*"당신은 주머니 열린 캥거루"*/
+      else if (t.purpose + t.city >= 5) return 'G'; /*"당신은 재벌 2세 공작새"*/
+      else if (t.achieve + t.rest >=5 ) return 'E'; /*"당신은 뜨거운 심장의 기린"*/
     };
 
     this.actions = {
@@ -85,17 +97,18 @@ export default class App extends React.Component {
           },
         }))
       },
-      2: a_or_b('city', 'rest'),
-      3: a_or_b('purpose', 'rest'),
-      4: a_or_b('achieve', 'rest'),
-      5: a_or_b('city', 'consume'),
-      6: a_or_b('consume', 'rest'),
-      7: a_or_b('purpose', 'achieve'),
-      8: a_or_b('achieve', 'consume'),
-      9: a_or_b('purpose', 'consume'),
-      10: a_or_b('city', 'purpose'),
-      11: a_or_b('rest', 'city'),
+      2: this.a_or_b('city', 'rest'),
+      3: this.a_or_b('purpose', 'rest'),
+      4: this.a_or_b('achieve', 'rest'),
+      5: this.a_or_b('city', 'consume'),
+      6: this.a_or_b('consume', 'rest'),
+      7: this.a_or_b('purpose', 'achieve'),
+      8: this.a_or_b('achieve', 'consume'),
+      9: this.a_or_b('purpose', 'consume'),
+      10: this.a_or_b('city', 'purpose'),
+      11: this.a_or_b('rest', 'city'),
       12: () => {
+        this.t = { city: 0, rest: 0, purpose: 0, achieve: 0, consume: 0 };
         this.setState(ps => ({
           // uri: images[1],
           page: 1,
@@ -113,7 +126,8 @@ export default class App extends React.Component {
             height: 52
           },
           bg_img: {
-            resizeMode: 'contain'
+            width: 375,
+            height: 667
           }
         }))
       }
@@ -122,8 +136,9 @@ export default class App extends React.Component {
 
   click_event(id) {
     if (this.state.page === 11) {
+      let type = this.type_is(this.t);
       this.setState(ps => ({
-        uri: images[type_is(t)],
+        uri: images[type],
         page: ps.page+1,
         scroll: true,
         left_btn: {
@@ -136,6 +151,10 @@ export default class App extends React.Component {
           right: 27,
           width: 322,
           height: 60
+        },
+        bg_img: {
+          width: 375,
+          height: this.img_height[type]
         }
       }));
       return this.actions[11](id);
