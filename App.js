@@ -1,17 +1,17 @@
 import React from 'react';
-import { StyleSheet, View, Image, Text, Button, TouchableOpacity, ScrollView, WebView } from 'react-native';
+import { StyleSheet, View, Image, Text, Button, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
 
 const _ = require('partial-js'), TO = TouchableOpacity;
 const images = {
-  1: require('./img/img_1.png'),
-  2: require('./img/img_2.png'),
-  3: require('./img/img_3.png'),
-  4: require('./img/img_4.png'),
-  5: require('./img/img_5.png'),
-  6: require('./img/img_6.png'),
-  7: require('./img/img_7.png'),
-  8: require('./img/img_8.png'),
-  9: require('./img/img_9.png'),
+  1: require('./img/img_01.png'),
+  2: require('./img/img_02.png'),
+  3: require('./img/img_03.png'),
+  4: require('./img/img_04.png'),
+  5: require('./img/img_05.png'),
+  6: require('./img/img_06.png'),
+  7: require('./img/img_07.png'),
+  8: require('./img/img_08.png'),
+  9: require('./img/img_09.png'),
   10: require('./img/img_10.png'),
   11: require('./img/img_11.png'),
   A: require('./img/img_12.png'),
@@ -35,7 +35,7 @@ export default class App extends React.Component {
         position: 'absolute',
         height: 47,
         width: 335,
-        borderRadius: 50
+        borderRadius: 50,
       },
       left_btn: {
         bottom: 105,
@@ -45,12 +45,9 @@ export default class App extends React.Component {
         bottom: 44,
         right: 34,
         width: 308,
-        height: 60
+        height: 60,
       },
-      bg_img: {
-        width: 375,
-        height: 667,
-      }
+      img_height: 667
     };
 
     this.img_height = {
@@ -66,7 +63,7 @@ export default class App extends React.Component {
 
     this.t = { city: 0, rest: 0, purpose: 0, achieve: 0, consume: 0 };
 
-    this.a_or_b = (a, b) => (id => ++this.t[id === 'left' ? a : b]);
+    this.a_or_b = (a, b) => (id => (++this.t[id === 'left' ? a : b], this.t));
 
     this.type_is = t => {
       if (_.every(t, t => t === 2)) return 'D'; /*"당신은 숨만 쉬어도 행복한 말미잘"*/
@@ -110,7 +107,6 @@ export default class App extends React.Component {
       12: () => {
         this.t = { city: 0, rest: 0, purpose: 0, achieve: 0, consume: 0 };
         this.setState(ps => ({
-          // uri: images[1],
           page: 1,
           scroll: false,
           btn: {
@@ -125,10 +121,7 @@ export default class App extends React.Component {
             width: 308,
             height: 52
           },
-          bg_img: {
-            width: 375,
-            height: 667
-          }
+          img_height: 667,
         }))
       }
     };
@@ -136,28 +129,31 @@ export default class App extends React.Component {
 
   click_event(id) {
     if (this.state.page === 11) {
-      let type = this.type_is(this.t);
-      this.setState(ps => ({
-        uri: images[type],
-        page: ps.page+1,
-        scroll: true,
-        left_btn: {
-          bottom: 105,
-          left: -2000,
-        },
-        right_btn: {
-          borderRadius: 20,
-          bottom: 20,
-          right: 27,
-          width: 322,
-          height: 60
-        },
-        bg_img: {
-          width: 375,
-          height: this.img_height[type]
-        }
-      }));
-      return this.actions[11](id);
+      return _.go(
+        this.state.page,
+        page => this.actions[page](id),
+        t => this.type_is(t),
+        _.all(
+        type => this.setState(ps => ({
+          uri: images[type],
+        })),
+        type => this.setState(ps => ({
+          page: ps.page+1,
+          scroll: true,
+          left_btn: {
+            bottom: 105,
+            left: -2000,
+          },
+          right_btn: {
+            borderRadius: 20,
+            bottom: 20,
+            right: 27,
+            width: 322,
+            height: 60
+          },
+          img_height: this.img_height[type],
+        })))
+      );
     }
 
     if (this.state.page === 12) {
@@ -175,7 +171,7 @@ export default class App extends React.Component {
   render() {
     return (
       <ScrollView style={styles.container} scrollEnabled={this.state.scroll} bounces={false}>
-        <Image source={this.state.uri} style={this.state.bg_img}/>
+        <Image source={this.state.uri} style={[styles.bg_img, { height: this.state.img_height }]}/>
         <TO onPress={() => this.click_event('left')} style={[this.state.btn, this.state.left_btn]}></TO>
         <TO onPress={() => this.click_event('right')} style={[this.state.btn, this.state.right_btn]}></TO>
       </ScrollView>
@@ -186,8 +182,15 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    height: '100%',
-    width: '100%',
+    // height: '100%',
+    // width: '100%',
     backgroundColor: 'rgb(25, 119, 159)'
   },
+  bg_img: {
+    width: 375,
+    resizeMode: 'contain'
+    // top: 0,
+    // right: 0,
+    // left: 0
+  }
 });
