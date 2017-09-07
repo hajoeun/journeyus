@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Image, Text, Button, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
+import { StyleSheet, View, Image, Text, Button, TouchableOpacity, ScrollView, WebView, ImageBackground } from 'react-native';
 
 const _ = require('partial-js'), TO = TouchableOpacity;
 const images = {
@@ -24,12 +24,24 @@ const images = {
   H: require('./img/img_19.png'),
 };
 
+const type_is = t => {
+  if (_.every(t, t => t === 2)) return 'D'; /*"당신은 숨만 쉬어도 행복한 말미잘"*/
+  else if (t.city === 4 && t.consume < 3 && t.achieve < 3 && t.rest < 3 && t.purpose < 3) return 'B'; /*"당신은 차가운 도시 여우"*/
+  else if (t.achieve + t.rest >=5 && t.consume <= 2) return 'A'; /*"당신은 티타임매니아 다람쥐"*/
+  else if (t.consume === 4 && t.consume + t.purpose >= 5) return 'F'; /*"당신은 클러버 올빼미"*/
+  else if (t.achieve <= 2 && t.rest + t.consume >= 5) return 'H'; /*"당신은 반전매력 돌고래"*/
+  else if (t.consume + t.city >= 5) return 'C'; /*"당신은 주머니 열린 캥거루"*/
+  else if (t.purpose + t.city >= 5) return 'G'; /*"당신은 재벌 2세 공작새"*/
+  else if (t.achieve + t.rest >=5 ) return 'E'; /*"당신은 뜨거운 심장의 기린"*/
+};
+
 export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       uri: images[1],
       page: 1,
+      type: undefined,
       scroll: false,
       btn: {
         position: 'absolute',
@@ -47,7 +59,15 @@ export default class App extends React.Component {
         width: 308,
         height: 60,
       },
-      img_height: 667
+      test: {
+        borderColor: 'red',
+        borderWidth: 5,
+      },
+      bg_img: {
+        height: 667,
+        width: 375,
+        // resizeMode: 'contain'
+      }
     };
 
     this.img_height = {
@@ -65,17 +85,6 @@ export default class App extends React.Component {
 
     this.a_or_b = (a, b) => (id => (++this.t[id === 'left' ? a : b], this.t));
 
-    this.type_is = t => {
-      if (_.every(t, t => t === 2)) return 'D'; /*"당신은 숨만 쉬어도 행복한 말미잘"*/
-      else if (t.city === 4 && t.consume < 3 && t.achieve < 3 && t.rest < 3 && t.purpose < 3) return 'B'; /*"당신은 차가운 도시 여우"*/
-      else if (t.achieve + t.rest >=5 && t.consume <= 2) return 'A'; /*"당신은 티타임매니아 다람쥐"*/
-      else if (t.consume === 4 && t.consume + t.purpose >= 5) return 'F'; /*"당신은 클러버 올빼미"*/
-      else if (t.achieve <= 2 && t.rest + t.consume >= 5) return 'H'; /*"당신은 반전매력 돌고래"*/
-      else if (t.consume + t.city >= 5) return 'C'; /*"당신은 주머니 열린 캥거루"*/
-      else if (t.purpose + t.city >= 5) return 'G'; /*"당신은 재벌 2세 공작새"*/
-      else if (t.achieve + t.rest >=5 ) return 'E'; /*"당신은 뜨거운 심장의 기린"*/
-    };
-
     this.actions = {
       1: () => {
         this.setState(ps => ({
@@ -91,7 +100,7 @@ export default class App extends React.Component {
             height: 100,
             width: 147,
             borderRadius: 18
-          },
+          }
         }))
       },
       2: this.a_or_b('city', 'rest'),
@@ -107,7 +116,9 @@ export default class App extends React.Component {
       12: () => {
         this.t = { city: 0, rest: 0, purpose: 0, achieve: 0, consume: 0 };
         this.setState(ps => ({
+          uri: images[1],
           page: 1,
+          type: undefined,
           scroll: false,
           btn: {
             position: 'absolute',
@@ -121,10 +132,25 @@ export default class App extends React.Component {
             width: 308,
             height: 52
           },
-          img_height: 667,
+          bg_img: {
+            width: 375,
+            height: 667,
+            // resizeMode: 'contain',
+          }
         }))
       }
     };
+  }
+
+  onload_event(page, type) {
+    if (page === 12)
+      this.setState({
+        bg_img: {
+          width: 375,
+          height: this.img_height[type],
+          resizeMode: 'contain',
+        }
+      })
   }
 
   click_event(id) {
@@ -132,12 +158,9 @@ export default class App extends React.Component {
       return _.go(
         this.state.page,
         page => this.actions[page](id),
-        t => this.type_is(t),
-        _.all(
+        t => type_is(t),
         type => this.setState(ps => ({
           uri: images[type],
-        })),
-        type => this.setState(ps => ({
           page: ps.page+1,
           scroll: true,
           left_btn: {
@@ -151,13 +174,12 @@ export default class App extends React.Component {
             width: 322,
             height: 60
           },
-          img_height: this.img_height[type],
-        })))
+          type: type
+        }))
       );
     }
 
     if (this.state.page === 12) {
-      this.setState(ps => ({ uri: images[1] }));
       return this.actions[12]();
     }
 
@@ -171,7 +193,7 @@ export default class App extends React.Component {
   render() {
     return (
       <ScrollView style={styles.container} scrollEnabled={this.state.scroll} bounces={false}>
-        <Image source={this.state.uri} style={[styles.bg_img, { height: this.state.img_height }]}/>
+        <Image source={this.state.uri} style={[this.state.bg_img]} resizeMode={'contain'} onLoad={() => this.onload_event(this.state.page, this.state.type)}/>
         <TO onPress={() => this.click_event('left')} style={[this.state.btn, this.state.left_btn]}></TO>
         <TO onPress={() => this.click_event('right')} style={[this.state.btn, this.state.right_btn]}></TO>
       </ScrollView>
@@ -181,16 +203,8 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    // height: '100%',
-    // width: '100%',
+    height: '100%',
+    width: '100%',
     backgroundColor: 'rgb(25, 119, 159)'
   },
-  bg_img: {
-    width: 375,
-    resizeMode: 'contain'
-    // top: 0,
-    // right: 0,
-    // left: 0
-  }
 });
