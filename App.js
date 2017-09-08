@@ -2,27 +2,27 @@ import React from 'react';
 import { StyleSheet, View, Image, Text, Button, TouchableOpacity, ScrollView, WebView, ImageBackground } from 'react-native';
 
 const _ = require('partial-js'), TO = TouchableOpacity;
-const images = {
-  1: require('./img/img_01.png'),
-  2: require('./img/img_02.png'),
-  3: require('./img/img_03.png'),
-  4: require('./img/img_04.png'),
-  5: require('./img/img_05.png'),
-  6: require('./img/img_06.png'),
-  7: require('./img/img_07.png'),
-  8: require('./img/img_08.png'),
-  9: require('./img/img_09.png'),
-  10: require('./img/img_10.png'),
-  11: require('./img/img_11.png'),
-  A: require('./img/img_12.png'),
-  B: require('./img/img_13.png'),
-  C: require('./img/img_14.png'),
-  D: require('./img/img_15.png'),
-  E: require('./img/img_16.png'),
-  F: require('./img/img_17.png'),
-  G: require('./img/img_18.png'),
-  H: require('./img/img_19.png'),
-};
+// const images = {
+//   1: require('./img/img_01.png'),
+//   2: require('./img/img_02.png'),
+//   3: require('./img/img_03.png'),
+//   4: require('./img/img_04.png'),
+//   5: require('./img/img_05.png'),
+//   6: require('./img/img_06.png'),
+//   7: require('./img/img_07.png'),
+//   8: require('./img/img_08.png'),
+//   9: require('./img/img_09.png'),
+//   10: require('./img/img_10.png'),
+//   11: require('./img/img_11.png'),
+//   A: require('./img/img_12.png'),
+//   B: require('./img/img_13.png'),
+//   C: require('./img/img_14.png'),
+//   D: require('./img/img_15.png'),
+//   E: require('./img/img_16.png'),
+//   F: require('./img/img_17.png'),
+//   G: require('./img/img_18.png'),
+//   H: require('./img/img_19.png'),
+// };
 
 const type_is = t => {
   if (_.every(t, t => t === 2)) return 'D'; /*"당신은 숨만 쉬어도 행복한 말미잘"*/
@@ -38,8 +38,30 @@ const type_is = t => {
 export default class App extends React.Component {
   constructor(props) {
     super(props);
+    this.images = {
+      1: require('./img/img_01.png'),
+      2: require('./img/img_02.png'),
+      3: require('./img/img_03.png'),
+      4: require('./img/img_04.png'),
+      5: require('./img/img_05.png'),
+      6: require('./img/img_06.png'),
+      7: require('./img/img_07.png'),
+      8: require('./img/img_08.png'),
+      9: require('./img/img_09.png'),
+      10: require('./img/img_10.png'),
+      11: require('./img/img_11.png'),
+      A: require('./img/img_12.png'),
+      B: require('./img/img_13.png'),
+      C: require('./img/img_14.png'),
+      D: require('./img/img_15.png'),
+      E: require('./img/img_16.png'),
+      F: require('./img/img_17.png'),
+      G: require('./img/img_18.png'),
+      H: require('./img/img_19.png'),
+    };
+
     this.state = {
-      uri: images[1],
+      uri: this.images[1],
       page: 1,
       type: undefined,
       scroll: false,
@@ -116,7 +138,7 @@ export default class App extends React.Component {
       12: () => {
         this.t = { city: 0, rest: 0, purpose: 0, achieve: 0, consume: 0 };
         this.setState(ps => ({
-          uri: images[1],
+          uri: this.images[1],
           page: 1,
           type: undefined,
           scroll: false,
@@ -131,11 +153,6 @@ export default class App extends React.Component {
             right: 34,
             width: 308,
             height: 52
-          },
-          bg_img: {
-            width: 375,
-            height: 667,
-            // resizeMode: 'contain',
           }
         }))
       }
@@ -144,13 +161,21 @@ export default class App extends React.Component {
 
   onload_event(page, type) {
     if (page === 12)
-      this.setState({
+      return this.setState({
         bg_img: {
           width: 375,
           height: this.img_height[type],
           resizeMode: 'contain',
         }
-      })
+      });
+    if (page === 1)
+      return this.setState({
+        bg_img: {
+          width: 375,
+          height: 667,
+          // resizeMode: 'contain',
+        }
+      });
   }
 
   click_event(id) {
@@ -160,7 +185,7 @@ export default class App extends React.Component {
         page => this.actions[page](id),
         t => type_is(t),
         type => this.setState(ps => ({
-          uri: images[type],
+          uri: this.images[type],
           page: ps.page+1,
           scroll: true,
           left_btn: {
@@ -186,14 +211,14 @@ export default class App extends React.Component {
     this.actions[this.state.page](id);
     return this.setState(ps => ({
       page: ps.page+1,
-      uri: images[ps.page+1]
+      uri: this.images[ps.page+1]
     }));
   }
 
   render() {
     return (
       <ScrollView style={styles.container} scrollEnabled={this.state.scroll} bounces={false}>
-        <Image source={this.state.uri} style={[this.state.bg_img]} resizeMode={'contain'} onLoad={() => this.onload_event(this.state.page, this.state.type)}/>
+        <Image source={{uri: this.state.uri}} style={[this.state.bg_img]} resizeMode={'contain'} onLoad={() => this.onload_event(this.state.page, this.state.type)}/>
         <TO onPress={() => this.click_event('left')} style={[this.state.btn, this.state.left_btn]}></TO>
         <TO onPress={() => this.click_event('right')} style={[this.state.btn, this.state.right_btn]}></TO>
       </ScrollView>
